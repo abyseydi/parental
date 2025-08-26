@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'dart:math';
 
 import 'package:perantal/utils/colors.dart';
 import 'package:perantal/widgets/app_bar.dart';
-import 'package:perantal/widgets/ctg.dart';
+import 'package:csv/csv.dart';
 
 class SizeConfig {
   static late MediaQueryData _mediaQueryData;
@@ -27,11 +28,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  // ... your existing code
-
   int currentStep = 1;
   String? _selectedConnectionMethod;
   late AnimationController _controller;
+  bool _isLoading = false;
+  bool _showButton = true;
 
   final TextEditingController _patientController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
@@ -42,7 +43,11 @@ class _HomePageState extends State<HomePage>
   final TextEditingController _communeController = TextEditingController();
   final TextEditingController _midwifeNameController = TextEditingController();
   final TextEditingController _doctorNameController = TextEditingController();
-
+  final TextEditingController _csvController = TextEditingController();
+  List<List<dynamic>> _csvData = [];
+  List<dynamic>? _selectedRandomRow;
+  List<dynamic>? _filteredDataRow;
+  List<dynamic>? _filteredHeaders;
   double responsiveWidth(double percentage) {
     return SizeConfig.screenWidth * percentage;
   }
@@ -70,11 +75,76 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    // Le 'vsync: this' est maintenant valide
     _controller = AnimationController(
-      vsync: this, // Le 'this' fait référence au mixin
+      vsync: this,
       duration: const Duration(seconds: 2),
     );
+  }
+
+  void _fetchAndDisplayData(String cdvCode) {
+    final List<String> dataPairs = cdvCode.split(';');
+    Map<String, String> dataMap = {};
+    for (String pair in dataPairs) {
+      List<String> parts = pair.split(':');
+      if (parts.length == 2) {
+        dataMap[parts[0].trim()] = parts[1].trim();
+      }
+    }
+
+    setState(() {
+      _patientController.text = dataMap['Nom'] ?? '';
+      _addressController.text = dataMap['Adresse'] ?? '';
+      _phoneController.text = dataMap['Tel'] ?? '';
+    });
+  }
+
+  Future<void> _loadCsvData() async {
+    // 1. Démarrez le chargement immédiatement
+    setState(() {
+      _isLoading = true;
+      _showButton = false;
+    });
+
+    // 2. Ajoutez un délai de 3 secondes avant de charger les données
+    await Future.delayed(const Duration(seconds: 3));
+
+    try {
+      final String csvString = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/data/data.csv');
+      final csvConverter = CsvToListConverter();
+      final List<List<dynamic>> result = csvConverter.convert(csvString);
+
+      if (result.length > 1) {
+        final random = Random();
+        final int randomIndex = random.nextInt(result.length - 1) + 1;
+
+        setState(() {
+          _csvData = result;
+          _selectedRandomRow = result[randomIndex];
+          _filterData(_selectedRandomRow!);
+        });
+      } else {
+        setState(() {
+          _csvData = result;
+          _selectedRandomRow = null;
+          _filteredDataRow = null;
+          _filteredHeaders = null;
+        });
+      }
+    } catch (e) {
+      print('Erreur lors de la lecture du fichier CSV : $e');
+      setState(() {
+        _selectedRandomRow = null;
+        _filteredDataRow = null;
+        _filteredHeaders = null;
+      });
+    } finally {
+      // 3. Désactivez le chargement une fois que tout est terminé (après le délai)
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -89,7 +159,13 @@ class _HomePageState extends State<HomePage>
           children: [
             _buildHeader(),
             SizedBox(height: responsiveHeight(0.02)),
-            _buildStepIndicator(),
+            Container(
+              width: responsiveWidth(1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [_buildStepIndicator()],
+              ),
+            ),
             SizedBox(height: responsiveHeight(0.04)),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: responsiveWidth(0.05)),
@@ -160,7 +236,7 @@ class _HomePageState extends State<HomePage>
           },
           child: AnimatedContainer(
             duration: Duration(milliseconds: 300),
-            margin: EdgeInsets.symmetric(horizontal: 12),
+            margin: EdgeInsets.symmetric(horizontal: 20),
             width: 48,
             height: 48,
             decoration: BoxDecoration(
@@ -324,7 +400,7 @@ class _HomePageState extends State<HomePage>
                       currentStep++;
                     });
                   }
-                : null, // Le bouton est désactivé si rien n'est sélectionné
+                : null,
             child: Text('Suivant'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.k_primary,
@@ -536,19 +612,111 @@ class _HomePageState extends State<HomePage>
 
   Widget _buildStepThree() {
     return _buildStepCard(
-      title: 'Resultats du CTG',
+      title: 'Résultats du CTG',
       content: Column(
         children: [
-          Lottie.asset(
-            'assets/img/ctg.json',
-            width: responsiveWidth(1),
-            height: responsiveHeight(0.08),
-            fit: BoxFit.contain,
+          // L'animation Lottie pour le chargement
+          if (_isLoading)
+            Column(
+              children: [
+                Lottie.asset(
+                  'assets/img/ctg.json',
+                  width: responsiveWidth(1),
+                  height: responsiveHeight(0.08),
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Chargement en cours...',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+
+          // Le bouton "Afficher"
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: _isLoading ? null : _loadCsvData,
+                child: Card(
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: BorderSide(color: AppColors.k_primary, width: 2),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.list, size: 40, color: AppColors.k_primary),
+                        SizedBox(width: 20),
+                        Text(
+                          'Afficher',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 30),
+
+          // Le contenu de la carte de données (s'affiche uniquement si pas en chargement)
+          if (!_isLoading &&
+              _filteredDataRow != null &&
+              _filteredHeaders != null)
+            _buildDataCard(headers: _filteredHeaders!, data: _filteredDataRow!),
+
+          // Un espace pour les cas où aucune donnée n'est affichée
+          if (!_isLoading &&
+              (_filteredDataRow == null || _filteredHeaders == null))
+            Text('Appuyez sur "Afficher" pour charger les données.'),
         ],
       ),
       actions: _buildNavigationButtons(),
+    );
+  }
+
+  // Nouvelle méthode pour construire la carte de données avec la mise en page souhaitée
+  Widget _buildDataCard({
+    required List<dynamic> headers,
+    required List<dynamic> data,
+  }) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(data.length, (colIndex) {
+            if (colIndex >= headers.length) {
+              return Container();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${headers[colIndex]}:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4), // Espace entre la clé et la valeur
+                Text(
+                  '${data[colIndex]}',
+                  style: TextStyle(color: Colors.black87),
+                ),
+                if (colIndex < data.length - 1)
+                  SizedBox(height: 16), // Saut de ligne entre les paires
+              ],
+            );
+          }),
+        ),
+      ),
     );
   }
 
@@ -588,7 +756,6 @@ class _HomePageState extends State<HomePage>
         children: [
           _buildSummaryRow(label: 'Nom', value: _patientController.text),
           _buildSummaryRow(label: 'Âge', value: _birthDateController.text),
-          // Vous pouvez ajouter d'autres champs ici
         ],
       ),
       actions: Row(
@@ -742,5 +909,34 @@ class _HomePageState extends State<HomePage>
         ],
       ),
     );
+  }
+
+  void _filterData(List<dynamic> row) {
+    if (_csvData.isEmpty) return;
+
+    final headers = _csvData[0];
+    final startHeader = 'baseline value';
+    final endHeader = 'date_analyse';
+
+    int startIndex = headers.indexOf(startHeader);
+    int endIndex = headers.indexOf(endHeader);
+
+    if (startIndex == -1 || endIndex == -1 || startIndex > endIndex) {
+      print('Champs de début ou de fin non trouvés.');
+      setState(() {
+        _filteredDataRow = null;
+        _filteredHeaders = null;
+      });
+      return;
+    }
+
+    // Extraction des en-têtes et des données filtrées
+    List<dynamic> newHeaders = headers.sublist(startIndex, endIndex + 1);
+    List<dynamic> newRow = row.sublist(startIndex, endIndex + 1);
+
+    setState(() {
+      _filteredHeaders = newHeaders;
+      _filteredDataRow = newRow;
+    });
   }
 }
