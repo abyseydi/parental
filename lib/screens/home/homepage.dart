@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:perantal/screens/settings/notification.dart';
 import 'dart:math';
 
 import 'package:perantal/utils/colors.dart';
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage>
   late AnimationController _controller;
   bool _isLoading = false;
   bool _showButton = true;
+  InterpretationResult _interpretationResult = InterpretationResult.unknown;
 
   final TextEditingController _patientController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
@@ -99,13 +101,11 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _loadCsvData() async {
-    // 1. Démarrez le chargement immédiatement
     setState(() {
       _isLoading = true;
       _showButton = false;
     });
 
-    // 2. Ajoutez un délai de 3 secondes avant de charger les données
     await Future.delayed(const Duration(seconds: 3));
 
     try {
@@ -122,7 +122,15 @@ class _HomePageState extends State<HomePage>
         setState(() {
           _csvData = result;
           _selectedRandomRow = result[randomIndex];
-          _filterData(_selectedRandomRow!);
+          // Pass both the full data and the selected row to the filter function
+          _filterData(_csvData, _selectedRandomRow!);
+
+          if (_filteredDataRow != null && _filteredHeaders != null) {
+            _interpretationResult = _interpretData(
+              _filteredDataRow!,
+              _filteredHeaders!,
+            );
+          }
         });
       } else {
         setState(() {
@@ -140,7 +148,6 @@ class _HomePageState extends State<HomePage>
         _filteredHeaders = null;
       });
     } finally {
-      // 3. Désactivez le chargement une fois que tout est terminé (après le délai)
       setState(() {
         _isLoading = false;
       });
@@ -210,10 +217,18 @@ class _HomePageState extends State<HomePage>
               ),
             ),
           ),
-          Icon(
-            Icons.notifications_none,
-            color: AppColors.k_background,
-            size: responsiveHeight(0.04),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Notifications()),
+              );
+            },
+            child: Icon(
+              Icons.notifications_none,
+              color: AppColors.k_background,
+              size: responsiveHeight(0.04),
+            ),
           ),
         ],
       ),
@@ -452,21 +467,21 @@ class _HomePageState extends State<HomePage>
             keyboardType: TextInputType.number,
           ),
           SizedBox(height: 16),
-          TextField(
-            controller: _nerfNameController,
-            decoration: InputDecoration(
-              labelText: 'Nom de la nerf',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: AppColors.k_primary),
-              ),
-            ),
-          ),
-          SizedBox(height: 16),
+          // TextField(
+          //   controller: _nerfNameController,
+          //   decoration: InputDecoration(
+          //     labelText: 'Nom de la nerf',
+          //     border: OutlineInputBorder(
+          //       borderRadius: BorderRadius.circular(10),
+          //       borderSide: BorderSide(color: Colors.grey[300]!),
+          //     ),
+          //     focusedBorder: OutlineInputBorder(
+          //       borderRadius: BorderRadius.circular(10),
+          //       borderSide: BorderSide(color: AppColors.k_primary),
+          //     ),
+          //   ),
+          // ),
+          // SizedBox(height: 16),
           TextField(
             controller: _addressController,
             decoration: InputDecoration(
@@ -615,7 +630,6 @@ class _HomePageState extends State<HomePage>
       title: 'Résultats du CTG',
       content: Column(
         children: [
-          // L'animation Lottie pour le chargement
           if (_isLoading)
             Column(
               children: [
@@ -633,7 +647,6 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-          // Le bouton "Afficher"
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -667,13 +680,11 @@ class _HomePageState extends State<HomePage>
           ),
           SizedBox(height: 30),
 
-          // Le contenu de la carte de données (s'affiche uniquement si pas en chargement)
           if (!_isLoading &&
               _filteredDataRow != null &&
               _filteredHeaders != null)
             _buildDataCard(headers: _filteredHeaders!, data: _filteredDataRow!),
 
-          // Un espace pour les cas où aucune donnée n'est affichée
           if (!_isLoading &&
               (_filteredDataRow == null || _filteredHeaders == null))
             Text('Appuyez sur "Afficher" pour charger les données.'),
@@ -683,7 +694,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // Nouvelle méthode pour construire la carte de données avec la mise en page souhaitée
   Widget _buildDataCard({
     required List<dynamic> headers,
     required List<dynamic> data,
@@ -705,13 +715,12 @@ class _HomePageState extends State<HomePage>
                   '${headers[colIndex]}:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 4), // Espace entre la clé et la valeur
+                SizedBox(height: 4),
                 Text(
                   '${data[colIndex]}',
                   style: TextStyle(color: Colors.black87),
                 ),
-                if (colIndex < data.length - 1)
-                  SizedBox(height: 16), // Saut de ligne entre les paires
+                if (colIndex < data.length - 1) SizedBox(height: 16),
               ],
             );
           }),
@@ -722,29 +731,172 @@ class _HomePageState extends State<HomePage>
 
   Widget _buildStepFour() {
     return _buildStepCard(
-      title: 'Téléchargement de documents',
+      title: 'Interprétation IA',
       content: Column(
         children: [
-          Center(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Logique d'upload
-              },
-              icon: Icon(Icons.cloud_upload_outlined),
-              label: Text('Uploader un fichier'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.k_primary,
-                side: BorderSide(color: AppColors.k_primary),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+          if (_interpretationResult == InterpretationResult.unknown)
+            Text(
+              'Appuyez sur "Afficher" à l\'étape précédente pour générer l\'analyse.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+              textAlign: TextAlign.center,
+            ),
+          if (_interpretationResult != InterpretationResult.unknown)
+            Column(
+              children: [
+                Text(
+                  'Résultat de l\'analyse :',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildAnimatedInterpretationBall(
+                      result: InterpretationResult.ok,
+                      currentInterpretation: _interpretationResult,
+                      color: Colors.green,
+                      label: 'OK',
+                    ),
+                    _buildAnimatedInterpretationBall(
+                      result: InterpretationResult.alert,
+                      currentInterpretation: _interpretationResult,
+                      color: Colors.orange,
+                      label: 'Alerte',
+                    ),
+                    _buildAnimatedInterpretationBall(
+                      result: InterpretationResult.danger,
+                      currentInterpretation: _interpretationResult,
+                      color: Colors.red,
+                      label: 'Danger',
+                    ),
+                  ],
+                ),
+                SizedBox(height: 30),
+                _buildInterpretationText(_interpretationResult),
+              ],
+            ),
+        ],
+      ),
+      actions: _buildNavigationButtons(),
+    );
+  }
+
+  Widget _buildInterpretationText(InterpretationResult result) {
+    String text;
+    switch (result) {
+      case InterpretationResult.ok:
+        text =
+            'Tout est en ordre : les indicateurs sont conformes aux normes de référence. Continuez la surveillance habituelle.';
+        break;
+      case InterpretationResult.alert:
+        text =
+            'Niveau d\'alerte : certains indicateurs sont hors des valeurs normales. Une attention particulière est recommandée.';
+        break;
+      case InterpretationResult.danger:
+        text =
+            'Situation d\'urgence: une prise en charge immediate est requise. Les indicateurs vitaux sont en dehors des seuils critiques.';
+        break;
+      default:
+        text = '';
+    }
+
+    return Text(
+      text,
+      style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  // Créez une nouvelle méthode pour construire le widget d'interprétation
+  Widget _buildInterpretationResult() {
+    late Color color;
+    late String text;
+
+    switch (_interpretationResult) {
+      case InterpretationResult.ok:
+        color = Colors.green;
+        text = 'Tout est en ordre : OK';
+        break;
+      case InterpretationResult.alert:
+        color = Colors.yellow[700]!;
+        text = 'Attention, niveau Alerte';
+        break;
+      case InterpretationResult.danger:
+        color = Colors.red;
+        text = 'Danger : Urgence !';
+        break;
+      case InterpretationResult.unknown:
+      default:
+        color = Colors.grey;
+        text = 'Interprétation non disponible.';
+        break;
+    }
+
+    return Column(
+      children: [
+        Icon(Icons.circle, size: 100, color: color),
+        SizedBox(height: 16),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedInterpretationBall({
+    required InterpretationResult result,
+    required InterpretationResult currentInterpretation,
+    required Color color,
+    required String label,
+  }) {
+    final isSelected = result == currentInterpretation;
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 500),
+      opacity: isSelected ? 1.0 : 0.3,
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            width: isSelected ? 90 : 80,
+            height: isSelected ? 90 : 80,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                if (isSelected)
+                  BoxShadow(
+                    color: color.withOpacity(0.6),
+                    blurRadius: 15,
+                    spreadRadius: 3,
+                  ),
+              ],
+            ),
+            child: Center(
+              child: Icon(
+                Icons.circle,
+                color: Colors.white,
+                size: isSelected ? 40 : 30,
               ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? color : Colors.grey[600],
             ),
           ),
         ],
       ),
-      actions: _buildNavigationButtons(),
     );
   }
 
@@ -911,10 +1063,38 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  void _filterData(List<dynamic> row) {
-    if (_csvData.isEmpty) return;
+  // void _filterData(List<List<dynamic>> allData, List<dynamic> row) {
+  //   if (allData.isEmpty) return;
 
-    final headers = _csvData[0];
+  //   final headers = allData[0];
+  //   final startHeader = 'baseline value';
+  //   final endHeader = 'date_analyse';
+
+  //   int startIndex = headers.indexOf(startHeader);
+  //   int endIndex = headers.indexOf(endHeader);
+
+  //   if (startIndex == -1 || endIndex == -1 || startIndex > endIndex) {
+  //     print('Champs de début ou de fin non trouvés.');
+  //     setState(() {
+  //       _filteredDataRow = null;
+  //       _filteredHeaders = null;
+  //     });
+  //     return;
+  //   }
+
+  //   // Extraction des en-têtes et des données filtrées
+  //   List<dynamic> newHeaders = headers.sublist(startIndex, endIndex + 1);
+  //   List<dynamic> newRow = row.sublist(startIndex, endIndex + 1);
+
+  //   setState(() {
+  //     _filteredHeaders = newHeaders;
+  //     _filteredDataRow = newRow;
+  //   });
+  // }
+  void _filterData(List<List<dynamic>> allData, List<dynamic> row) {
+    if (allData.isEmpty) return;
+
+    final headers = allData[0];
     final startHeader = 'baseline value';
     final endHeader = 'date_analyse';
 
@@ -939,4 +1119,33 @@ class _HomePageState extends State<HomePage>
       _filteredDataRow = newRow;
     });
   }
+
+  InterpretationResult _interpretData(
+    List<dynamic> data,
+    List<dynamic> headers,
+  ) {
+    // Trouvez l'indice de la colonne 'baseline value'
+    final int baselineIndex = headers.indexOf('baseline value');
+
+    if (baselineIndex == -1 || baselineIndex >= data.length) {
+      return InterpretationResult.unknown;
+    }
+
+    // Convertissez la valeur en nombre (assurez-vous que la valeur est bien un nombre)
+    final dynamic baselineValue = data[baselineIndex];
+    if (baselineValue is! num) {
+      return InterpretationResult.unknown;
+    }
+
+    // Logique d'interprétation (vous pouvez ajuster ces seuils selon vos besoins)
+    if (baselineValue > 150) {
+      return InterpretationResult.danger;
+    } else if (baselineValue >= 130) {
+      return InterpretationResult.alert;
+    } else {
+      return InterpretationResult.ok;
+    }
+  }
 }
+
+enum InterpretationResult { ok, alert, danger, unknown }

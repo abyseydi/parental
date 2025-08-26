@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:perantal/screens/home/homepage.dart';
+import 'package:perantal/screens/settings/notification.dart';
+import 'package:perantal/screens/settings/profile.dart';
 import 'package:perantal/utils/colors.dart';
 
 class MainScreen extends StatefulWidget {
@@ -13,6 +15,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     // Ajoute ici tes pages
     HomePage(),
+    Profile(),
   ];
 
   void onTabTapped(int index) {
