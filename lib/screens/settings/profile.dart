@@ -87,7 +87,11 @@ class _ProfileState extends State<Profile> {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                Navigator.popUntil(
+                  context,
+                  ModalRoute.withName('/HomePage'),
+                ); // par nom de route
               },
               child: Icon(Icons.arrow_back_ios, color: Colors.white),
             ),

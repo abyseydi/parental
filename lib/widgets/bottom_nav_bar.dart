@@ -12,11 +12,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    // Ajoute ici tes pages
-    HomePage(),
-    Profile(),
-  ];
+  final List<Widget> _pages = [HomePage(), Profile()];
 
   void onTabTapped(int index) {
     setState(() {
@@ -37,10 +33,7 @@ class _MainScreenState extends State<MainScreen> {
         onTap: onTabTapped,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.analytics),
-          //   label: 'Analyse',
-          // ),
+
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
