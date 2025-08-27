@@ -1,3 +1,28 @@
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+signingConfigs {
+    release {
+        if (keystoreProperties['storeFile']) {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+}
+buildTypes {
+    release {
+        signingConfig signingConfigs.release
+        minifyEnabled true
+        shrinkResources true
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -24,8 +49,11 @@ android {
         applicationId = "com.example.perantal"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // minSdk = flutter.minSdkVersion
+        minSdkVersion 21
+        // targetSdk = flutter.targetSdkVersion
+        targetSdkVersion 34
+        compileSdkVersion 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
