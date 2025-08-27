@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:perantal/screens/settings/notification.dart';
 import 'package:perantal/utils/colors.dart';
 import 'package:perantal/widgets/app_bar.dart';
+import 'package:perantal/widgets/bottom_nav_bar.dart';
 
 class SizeConfig {
   static late MediaQueryData _mediaQueryData;
@@ -36,7 +37,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialise SizeConfig
     SizeConfig().init(context);
 
     return Scaffold(
@@ -44,7 +44,7 @@ class _ProfileState extends State<Profile> {
       backgroundColor: AppColors.k_background,
       body: Column(
         children: [
-          _buildHeader(), // L'en-tête est en dehors du SingleChildScrollView
+          _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -87,12 +87,12 @@ class _ProfileState extends State<Profile> {
           children: [
             GestureDetector(
               onTap: () {
-                // Navigator.pop(context);
-                Navigator.popUntil(
-                  context,
-                  ModalRoute.withName('/HomePage'),
-                ); // par nom de route
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => MainScreen()),
+                  (route) => false,
+                );
               },
+
               child: Icon(Icons.arrow_back_ios, color: Colors.white),
             ),
             SizedBox(width: 50),
@@ -157,9 +157,7 @@ class _ProfileState extends State<Profile> {
         ),
         const SizedBox(height: 10),
         ElevatedButton.icon(
-          onPressed: () {
-            // Logique pour modifier le profil
-          },
+          onPressed: () {},
           icon: const Icon(Icons.edit, size: 20),
           label: const Text('Modifier le profil'),
           style: ElevatedButton.styleFrom(
@@ -250,5 +248,11 @@ class _ProfileState extends State<Profile> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Divider(height: 1, color: Colors.grey[300]),
     );
+  }
+
+  void goToMain() {
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil('/HomePage', (route) => false);
   }
 }

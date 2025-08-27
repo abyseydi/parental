@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CustomButtons {
-  // Bouton Élémentaire
   static Widget primaryButton({
     required String text,
     required VoidCallback onPressed,
@@ -19,7 +18,6 @@ class CustomButtons {
     );
   }
 
-  // Bouton Secondaire (à contours)
   static Widget secondaryButton({
     required String text,
     required VoidCallback onPressed,
@@ -37,7 +35,6 @@ class CustomButtons {
     );
   }
 
-  // Bouton Icône
   static Widget iconButton({
     required IconData icon,
     required VoidCallback onPressed,

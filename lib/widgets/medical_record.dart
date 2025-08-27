@@ -43,7 +43,6 @@ class _MedicalRecordDialogState extends State<MedicalRecordDialog> {
             final form = _formKey.currentState;
             if (form != null && form.validate()) {
               form.save();
-              // ici, tu peux gérer l'enregistrement des données
               Navigator.of(
                 context,
               ).pop({'nom': nomPatiente, 'age': agePatiente});

@@ -3,7 +3,6 @@ import 'package:perantal/utils/colors.dart';
 import 'package:perantal/widgets/app_bar.dart';
 import 'package:intl/intl.dart';
 
-// Définissez une classe pour représenter une notification
 class NotificationModel {
   final String title;
   final String message;
@@ -28,7 +27,6 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  // Liste de notifications fictives pour la démonstration
   final List<NotificationModel> _notifications = [
     NotificationModel(
       title: 'Analyse CTG prête',
@@ -69,7 +67,6 @@ class _NotificationsState extends State<Notifications> {
       backgroundColor: AppColors.k_background,
       body: Column(
         children: [
-          // L'en-tête pour le titre de la page
           _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
@@ -78,7 +75,6 @@ class _NotificationsState extends State<Notifications> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    // Génère la liste de notifications
                     ..._notifications.map((notification) {
                       return _buildNotificationCard(notification);
                     }).toList(),
@@ -109,9 +105,7 @@ class _NotificationsState extends State<Notifications> {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.pop(
-                  context,
-                ); // Cette ligne permet de revenir à la page précédente
+                Navigator.pop(context);
               },
               child: Icon(Icons.arrow_back_ios, color: Colors.white),
             ),
@@ -138,9 +132,7 @@ class _NotificationsState extends State<Notifications> {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: notification.isRead
-          ? Colors.white
-          : Colors.blue[50], // Couleur pour les notifications non lues
+      color: notification.isRead ? Colors.white : Colors.blue[50],
       child: ListTile(
         leading: Icon(
           notification.icon,
@@ -184,13 +176,8 @@ class _NotificationsState extends State<Notifications> {
               )
             : null,
         onTap: () {
-          // Logique pour marquer la notification comme lue et naviguer
           setState(() {
-            // Un exemple simple: ne change l'état que si elle n'est pas lue
-            if (!notification.isRead) {
-              // Dans une vraie application, vous mettez à jour votre modèle de données
-              // notification.isRead = true; // Non modifiable, car final. Il faudrait recréer l'objet
-            }
+            if (!notification.isRead) {}
           });
         },
       ),

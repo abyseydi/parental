@@ -15,7 +15,6 @@ class CtgPainter extends CustomPainter {
 
     final path = Path();
 
-    // Calcule le nombre de points à dessiner en fonction de la valeur de l'animation
     final numPoints = (animation.value * ctgDataPoints.length).floor();
 
     if (numPoints > 0) {

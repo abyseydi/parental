@@ -3,18 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:perantal/utils/colors.dart';
 import 'package:perantal/utils/size_config.dart';
 
-
-
-
 class Auth extends StatelessWidget {
   double responsiveWidth(double percentage) {
-  return SizeConfig.screenWidth * percentage;
-}
+    return SizeConfig.screenWidth * percentage;
+  }
 
-double responsiveHeight(double percentage) {
-  return SizeConfig.screenHeight * percentage;
-}
-
+  double responsiveHeight(double percentage) {
+    return SizeConfig.screenHeight * percentage;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +27,7 @@ double responsiveHeight(double percentage) {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                 AppColors.k_background,
-AppColors.k_primary                ],
+                colors: [AppColors.k_background, AppColors.k_primary],
               ),
             ),
             child: Center(
@@ -54,15 +48,12 @@ AppColors.k_primary                ],
             onPressed: () {},
             style: ElevatedButton.styleFrom(
               fixedSize: Size(250, 50),
-              backgroundColor: Color(0xFF4CAF50), // Vert
+              backgroundColor: Color(0xFF4CAF50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: Text(
-              'INSCRIPTION',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: Text('INSCRIPTION', style: TextStyle(color: Colors.white)),
           ),
           SizedBox(height: 20),
           OutlinedButton(
