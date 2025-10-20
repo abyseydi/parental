@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:perantal/screens/auth/login.dart';
 import 'package:perantal/screens/auth/signup.dart';
 import 'package:perantal/utils/colors.dart';
 import 'package:perantal/utils/size_config.dart';
@@ -14,15 +15,13 @@ class Auth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ⚠️ initialise SizeConfig ici
     SizeConfig.init(context);
 
     return Scaffold(
       backgroundColor: AppColors.k_background,
       body: Center(
-        // ← centrer toute la colonne
         child: Column(
-          mainAxisSize: MainAxisSize.min, // évite de prendre toute la hauteur
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -53,7 +52,12 @@ class Auth extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             OutlinedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
               style: OutlinedButton.styleFrom(
                 fixedSize: const Size(250, 50),
                 side: const BorderSide(width: 1, color: AppColors.k_primary),

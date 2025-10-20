@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:perantal/screens/auth/login.dart';
 import 'package:perantal/utils/colors.dart';
 import 'package:perantal/utils/size_config.dart';
-import 'package:perantal/widgets/bottom_nav_bar.dart'; // <-- pour MainScreen
+// import 'package:perantal/widgets/bottom_nav_bar.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePw = true;
   bool _obscurePw2 = true;
   bool _loading = false;
-  bool _acceptTerms = false; // décoché par défaut
+  bool _acceptTerms = false;
 
   double responsiveWidth(double p) => SizeConfig.screenWidth * p;
   double responsiveHeight(double p) => SizeConfig.screenHeight * p;
@@ -62,11 +63,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _loading = true);
     try {
-      // TODO: Appeler ton backend / Firebase ici
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;
 
-      await _showSuccessAndGoHome(); // <-- pop-up + navigation vers MainScreen
+      await _showSuccessAndGoHome();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -77,7 +77,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  /// Pop-up de succès stylé, puis navigation vers MainScreen
   Future<void> _showSuccessAndGoHome() async {
     await showDialog(
       context: context,
@@ -94,7 +93,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Check dans un cercle
                 Container(
                   width: 72,
                   height: 72,
@@ -124,15 +122,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.of(ctx).pop(); // fermer le pop-up
-                      // Aller sur MainScreen et nettoyer la pile
+                      Navigator.of(ctx).pop();
                       Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => MainScreen()),
+                        MaterialPageRoute(builder: (_) => LoginScreen()),
                         (route) => false,
                       );
                     },
                     icon: const Icon(Icons.arrow_forward_rounded),
-                    label: const Text("Aller au tableau de bord"),
+                    label: const Text("CONNEXION"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.k_primary,
                       foregroundColor: Colors.white,
@@ -151,7 +148,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // ==== POP-UP CGU (Bottom Sheet) ====
   Future<void> _showLegalPopup() async {
     await showModalBottomSheet(
       context: context,
@@ -395,7 +391,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Nom
                           TextFormField(
                             controller: _firstnameCtrl,
                             textInputAction: TextInputAction.next,
@@ -409,7 +404,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Prénom
                           TextFormField(
                             controller: _lastnameCtrl,
                             textInputAction: TextInputAction.next,
@@ -423,7 +417,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Email
                           TextFormField(
                             controller: _emailCtrl,
                             keyboardType: TextInputType.emailAddress,
@@ -447,7 +440,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Téléphone
                           TextFormField(
                             controller: _phoneCtrl,
                             keyboardType: TextInputType.phone,
@@ -470,7 +462,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Mot de passe
                           TextFormField(
                             controller: _passwordCtrl,
                             obscureText: _obscurePw,
@@ -499,7 +490,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Confirmation
                           TextFormField(
                             controller: _confirmCtrl,
                             obscureText: _obscurePw2,
@@ -529,7 +519,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 8),
 
-                          // Conditions
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -581,7 +570,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // CTA
                   SizedBox(
                     width: 250,
                     height: 50,
@@ -610,7 +598,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Lien Connexion
                   SizedBox(
                     width: 250,
                     height: 50,
