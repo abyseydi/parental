@@ -1,76 +1,73 @@
 import 'package:flutter/material.dart';
-
+import 'package:perantal/screens/auth/signup.dart';
 import 'package:perantal/utils/colors.dart';
 import 'package:perantal/utils/size_config.dart';
 
 class Auth extends StatelessWidget {
-  double responsiveWidth(double percentage) {
-    return SizeConfig.screenWidth * percentage;
-  }
+  const Auth({super.key});
 
-  double responsiveHeight(double percentage) {
-    return SizeConfig.screenHeight * percentage;
-  }
+  double responsiveWidth(double percentage) =>
+      SizeConfig.screenWidth * percentage;
+
+  double responsiveHeight(double percentage) =>
+      SizeConfig.screenHeight * percentage;
 
   @override
   Widget build(BuildContext context) {
+    // ⚠️ initialise SizeConfig ici
+    SizeConfig.init(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: responsiveHeight(0.6),
-            width: 250,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.k_background, AppColors.k_primary],
-              ),
+      backgroundColor: AppColors.k_background,
+      body: Center(
+        // ← centrer toute la colonne
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // évite de prendre toute la hauteur
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: responsiveHeight(0.25),
+              width: 250,
+              child: Image.asset("assets/img/logo.jpg"),
             ),
-            child: Center(
-              child: Text(
-                'PERANTAL',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+            SizedBox(height: responsiveHeight(0.2), width: 250),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(250, 50),
+                backgroundColor: AppColors.k_primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                textAlign: TextAlign.center,
+              ),
+              child: const Text(
+                'INSCRIPTION',
+                style: TextStyle(color: Colors.white),
               ),
             ),
-          ),
-          SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              fixedSize: Size(250, 50),
-              backgroundColor: Color(0xFF4CAF50),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                fixedSize: const Size(250, 50),
+                side: const BorderSide(width: 1, color: AppColors.k_primary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'CONNEXION',
+                style: TextStyle(color: AppColors.k_primary),
               ),
             ),
-            child: Text('INSCRIPTION', style: TextStyle(color: Colors.white)),
-          ),
-          SizedBox(height: 20),
-          OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              fixedSize: Size(250, 50),
-              side: BorderSide(width: 1, color: Color(0xFF4CAF50)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text(
-              'CONNEXION',
-              style: TextStyle(color: Color(0xFF4CAF50)),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
