@@ -39,7 +39,7 @@ class Auth extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                fixedSize: const Size(250, 50),
+                fixedSize: const Size(300, 50),
                 backgroundColor: AppColors.k_primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -59,7 +59,7 @@ class Auth extends StatelessWidget {
                 );
               },
               style: OutlinedButton.styleFrom(
-                fixedSize: const Size(250, 50),
+                fixedSize: const Size(300, 50),
                 side: const BorderSide(width: 1, color: AppColors.k_primary),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

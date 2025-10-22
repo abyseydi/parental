@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:perantal/screens/home/homepage.dart';
-import 'package:perantal/screens/settings/notification.dart';
 import 'package:perantal/screens/settings/profile.dart';
 import 'package:perantal/utils/colors.dart';
 

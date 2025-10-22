@@ -526,12 +526,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 value: _acceptTerms,
                                 onChanged: (_) => _showLegalPopup(),
                                 fillColor:
-                                    MaterialStateProperty.resolveWith<Color>((
+                                    WidgetStateProperty.resolveWith<Color>((
                                       states,
                                     ) {
-                                      if (states.contains(
-                                        MaterialState.selected,
-                                      ))
+                                      if (states.contains(WidgetState.selected))
                                         return AppColors.k_primary;
                                       return Colors.grey.shade400;
                                     }),
@@ -571,7 +569,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 24),
 
                   SizedBox(
-                    width: 250,
+                    width: 300,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _loading ? null : _register,
@@ -599,7 +597,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 12),
 
                   SizedBox(
-                    width: 250,
+                    width: 300,
                     height: 50,
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),

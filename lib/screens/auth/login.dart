@@ -346,7 +346,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
 
                   SizedBox(
-                    width: 250,
+                    width: 300,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _loading ? null : _login,
@@ -374,7 +374,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 12),
 
                   SizedBox(
-                    width: 250,
+                    width: 300,
                     height: 50,
                     child: OutlinedButton(
                       onPressed: () {
